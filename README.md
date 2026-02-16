@@ -1,3 +1,6 @@
+DONATION BTC bc1q4389vgy042up2h78eeel5ne64xnr5rx54ksp66
+
+## How to Compile
 g++ jokeremvwriter.cpp -o jokeremvwriter.exe -mwindows -lwinscard -lcomctl32 -luser32 -lgdi32 -std=c++17 -O2 -Wall
 
 ---
