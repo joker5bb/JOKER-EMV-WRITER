@@ -1,7 +1,7 @@
 DONATION BTC bc1q4389vgy042up2h78eeel5ne64xnr5rx54ksp66
 
-## How to Compile
-g++ -o jokeremvwriter.exe jokeremvwriter2.cpp -lwinscard -lcomctl32 -luser32 -lgdi32 -mwindows -static
+## How to Compile Version 3.0
+g++ -o jokeremvwriter3.exe jokeremvwriter3.cpp -lwinscard -lcomctl32 -luser32 -lgdi32 -mwindows -std=c++11 -static
 
 ---
 
