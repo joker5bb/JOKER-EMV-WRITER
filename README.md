@@ -1539,3 +1539,171 @@ This command allows the terminal to:
 ---
 
 This architecture ensures secure, scalable, and compliant payment processing across the global SWIFT network with regional redundancy and strict access controls.
+
+ # Comprehensive Network Security Flow: SWIFT, EMV, NFC & Network Infrastructure
+
+
+## 1. SWIFT Network Security (Financial Messaging Layer)
+
+**SWIFT (Society for Worldwide Interbank Financial Telecommunication)** operates the global financial messaging network handling over **42 million messages daily** across 11,000+ financial institutions .
+
+### SWIFTNet Infrastructure Security
+SWIFT migrated to **SWIFTNet** (IP-based infrastructure) between 2001-2005, replacing legacy X.25 systems . The security framework includes:
+
+| Component | Security Function |
+|-----------|------------------|
+| **SWIFTNet InterAct** | Real-time and store-and-forward messaging with XML wrappers |
+| **SWIFTNet FileAct** | Secure file transfer for bulk data |
+| **Relationship Management Application (RMA)** | Replaced bilateral key exchange (BKE) in 2009 for authenticated relationships |
+| **Customer Security Controls Framework (CSCF)** | Mandatory security controls including encryption, access controls, and transaction monitoring  |
+
+### SWIFT Security Controls (CSCF v2024) :
+- **Multi-factor authentication** for all operator access
+- **Transaction limits** by amount, currency, geography, and time (business hours only)
+- **End-to-day reconciliation** of MT 900/910 confirmations
+- **Session monitoring** for sequential gaps or abnormal behavior
+- **Separation of duties** preventing single operators from creating and approving transactions
+
+---
+
+## 2. EMV Chip Card Security (Payment Terminal Layer)
+
+**EMV (Europay, MasterCard, Visa)** represents the global standard for secure card payments using embedded microchips .
+
+### EMV Transaction Security Flow
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   EMV Chip Card │────▶│   POS Terminal   │────▶│  Issuer Host    │
+│  (Secure MCU)   │     │  (EMV L2 Kernel) │     │ (Authorization) │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+        │                        │                        │
+        ▼                        ▼                        ▼
+   • Unique per-transaction   • Risk management       • ARQC verification
+     cryptograms (ARQC/TC)    • CVM verification      • Dynamic authentication
+   • Offline data auth        • Terminal action       • Authorization response
+   • Application cryptograms    analysis                (ARPC)
+```
+
+**Key Security Features** :
+1. **Dynamic Data Authentication**: Each transaction generates a unique **Authorization Request Cryptogram (ARQC)** that cannot be replayed
+2. **Cardholder Verification Methods (CVM)**: PIN, signature, or no verification for low-value transactions
+3. **Application Cryptograms**: 
+   - **ARQC** (Authorization Request Cryptogram) - requests online approval
+   - **TC** (Transaction Certificate) - offline approval
+   - **AAC** (Application Authentication Cryptogram) - decline
+4. **Risk Management**: Terminal checks floor limits, velocity checking, and random transaction selection for online authorization
+
+---
+
+## 3. NFC (Near Field Communication) Security
+
+**NFC** enables contactless EMV payments through proximity-based communication (typically <4cm) .
+
+### NFC-EMV Integration Security
+
+| Aspect | Security Mechanism |
+|--------|-------------------|
+| **Proximity Control** | Extremely short range prevents remote eavesdropping |
+| **Tokenization** | Payment tokens replace actual PAN (Primary Account Number)  |
+| **Dynamic Authentication** | Same EMV cryptogram generation as contact transactions |
+| **Secure Element** | Credentials stored in hardware-isolated secure chips |
+
+**Mobile NFC Payment Flow** :
+1. **Provisioning**: Card data → Token Service Provider (TSP) → Tokenized credentials → Mobile device
+2. **Transaction**: Device generates ARQC using token → Payment network detokenizes → Issuer authorizes
+3. **Response**: Issuer sends ARPC → Network retokenizes → Device receives confirmation
+
+---
+
+## 4. Network Infrastructure Security (NIC, Firewall, DNS, IP, MAC)
+
+### Network Interface Card (NIC) Security
+- **Hardware Addressing**: Each NIC has a unique **MAC (Media Access Control)** address (48-bit identifier)
+- **Promiscuous Mode Detection**: Security systems monitor for NICs capturing all traffic (potential sniffing)
+- **Virtual NICs**: Cloud environments use virtual NICs with MAC address spoofing protection
+
+### Firewall Security Layers
+
+**Traditional Firewall (Layer 3-4)**:
+- **IP Address Filtering**: Whitelist/blacklist source/destination IP addresses
+- **Port Control**: Restrict services by TCP/UDP port numbers
+- **Stateful Inspection**: Track connection states (TCP handshakes, session validity)
+
+**Next-Generation Firewall (Layer 7)**:
+- **Deep Packet Inspection (DPI)**: Analyze payload content for malware/signatures
+- **Application Awareness**: Identify applications regardless of port used
+- **User Identity Integration**: Tie IP addresses to user authentication
+
+### DNS Security (DNSSEC)
+- **Authentication**: Cryptographic verification that DNS responses haven't been tampered with
+- **Integrity**: Prevents DNS cache poisoning attacks that could redirect traffic to malicious IPs
+- **Query Logging**: Monitor for data exfiltration via DNS tunneling
+
+### IP & MAC Address Security Relationship
+
+| Layer | Address Type | Security Function |
+|-------|-------------|-------------------|
+| **Layer 2 (Data Link)** | MAC Address | Physical device identification, ARP inspection, DHCP snooping |
+| **Layer 3 (Network)** | IP Address | Logical network segmentation, routing decisions, geo-blocking |
+| **Layer 4-7** | Port/Session | Application access control, stateful filtering |
+
+**ARP Security**: Firewalls and switches use **Dynamic ARP Inspection (DAI)** to prevent ARP spoofing attacks where attackers associate their MAC with legitimate IP addresses .
+
+---
+
+## 5. Integrated Security Flow: Complete Transaction Journey
+
+Here's how these components work together in a secure financial transaction:
+
+### Scenario: Contactless EMV Payment via SWIFT Network
+
+```
+┌─────────────┐   NFC/EMV   ┌─────────────┐   IP/Encrypted   ┌─────────────┐
+│  EMV Card   │◄───────────▶│  Merchant   │◄───────────────▶│   Acquirer  │
+│ (NFC Chip)  │  Short-range│   Terminal  │    TLS/HTTPS     │   Gateway   │
+└─────────────┘   encrypted └─────────────┘                  └──────┬──────┘
+       │                                                            │
+       │                                                            ▼
+       │                                                   ┌─────────────┐
+       │                                                   │   Firewall  │
+       │                                                   │  (Inspects  │
+       │                                                   │   IP/MAC,   │
+       │                                                   │   DPI, IDS) │
+       │                                                   └──────┬──────┘
+       │                                                            │
+       ▼                                                            ▼
+┌─────────────┐                                          ┌─────────────┐
+│  Generates  │                                          │   SWIFTNet  │
+│   ARQC +    │                                          │   Network   │
+│   Tokenized │                                          │  (Financial │
+│     PAN     │                                          │   Messaging)│
+└─────────────┘                                          └──────┬──────┘
+                                                                │
+                                                                ▼
+                                                       ┌─────────────┐
+                                                       │   Issuer    │
+                                                       │    Bank     │
+                                                       │ (Validates  │
+                                                       │   ARQC via  │
+                                                       │   HSM)      │
+                                                       └─────────────┘
+```
+
+### Security Controls at Each Layer:
+
+1. **Physical Layer (NFC)**: Proximity-based communication prevents remote interception; EMV chip generates unique cryptograms 
+2. **Network Layer (IP/MAC)**: Firewalls verify source IP reputation, MAC address consistency, and prevent ARP spoofing 
+3. **Transport Layer**: TLS 1.3 encryption for data in transit between terminal and gateway
+4. **Application Layer (EMV)**: Dynamic authentication via ARQC/ARPC exchange; tokenization ensures PAN never transmitted in clear 
+5. **Financial Layer (SWIFT)**: RMA authentication, message encryption, transaction monitoring, and mandatory CSCF controls 
+6. **DNS Layer**: DNSSEC prevents redirection to malicious payment gateways
+
+### Key Security Intersections:
+
+- **MAC + IP Binding**: DHCP snooping ensures devices can't spoof MAC addresses to bypass IP-based access controls
+- **DNS + Firewall**: DNS filtering blocks known malicious domains before IP connection attempts
+- **EMV + Network Encryption**: Even if network traffic is intercepted, EMV cryptograms are single-use and time-bound
+- **SWIFT + Endpoint**: End-to-end encryption ensures messages remain secure even if intermediate network layers are compromised
+
+This layered approach ensures that compromising any single component (NFC, IP, DNS, or SWIFT) doesn't compromise the entire transaction—true **defense in depth** for financial network security.
